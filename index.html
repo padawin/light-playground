@@ -1,0 +1,152 @@
+<html>
+	<head></head>
+	<body>
+		<canvas width="500" height="500" id="my-canvas"></canvas>
+		<script type="text/javascript">
+			let canvas = document.getElementById("my-canvas");
+			let context = canvas.getContext("2d");
+			let timePreviousFrame,
+				maxFPS = 60,
+				interval = 1000 / maxFPS;
+
+			let nodes = [
+				[10, 10],
+				[70, 10],
+				[70, 100],
+				[10, 100],
+
+				[130, 30],
+				[140, 40],
+				[120, 110],
+				[120, 80],
+				[90, 60]
+			];
+
+			let polygons = [
+				[
+					nodes[0],
+					nodes[1],
+					nodes[2],
+					nodes[3]
+				],
+				[
+					nodes[4],
+					nodes[5],
+					nodes[6],
+					nodes[7],
+					nodes[8]
+				]
+			];
+
+			let lights = [
+				[150, 150]
+			];
+
+			function drawPolygon(polygon) {
+				context.beginPath();
+				context.moveTo(polygon[0], polygon[1]);
+				for (let node of polygon) {
+					context.lineTo(node[0], node[1]);
+				}
+				context.closePath();
+				context.stroke();
+			}
+
+			function drawLight(light) {
+				context.beginPath();
+				context.arc(light[0], light[1], 5, 0, 2 * Math.PI, false);
+				context.fill();
+			}
+
+			function segmentsIntersect(segment1, segment2) {
+				let segment1X, segment1Y, segment2X, segment2Y;
+				segment1X = segment1[1][0] - segment1[0][0];
+				segment1Y = segment1[1][1] - segment1[0][1];
+				segment2X = segment2[1][0] - segment2[0][0];
+				segment2Y = segment2[1][1] - segment2[0][1];
+
+				let s, t;
+				s = (-segment1Y * (segment1[0][0] - segment2[0][0]) + segment1X * (segment1[0][1] - segment2[0][1])) / (-segment2X * segment1Y + segment1X * segment2Y);
+				t = ( segment2X * (segment1[0][1] - segment2[0][1]) - segment2Y * (segment1[0][0] - segment2[0][0])) / (-segment2X * segment1Y + segment1X * segment2Y);
+
+				return s >= 0 && s <= 1 && t >= 0 && t <= 1;
+			}
+
+			function lightRayIntersectsPolygon(lightRay, polygon) {
+				for (let nodeIndex = 0; nodeIndex < polygon.length; ++nodeIndex) {
+					let node1 = polygon[nodeIndex];
+					let node2 = polygon[(nodeIndex + 1) % polygon.length];
+					if (node1 == lightRay[1] || node2 == lightRay[1]) {
+						continue;
+					}
+
+					let edge = [node1, node2];
+					if (segmentsIntersect(edge, lightRay)) {
+						return true;;
+					}
+				}
+
+				return false;
+			}
+
+			function generateShadows() {
+				for (let node of nodes) {
+					let reacheableByLight = true;
+					let lightRay = [lights[0], node];
+					polygons:
+					for (let polygon of polygons) {
+						if (lightRayIntersectsPolygon(lightRay, polygon)) {
+							reacheableByLight = false;
+							break;
+						}
+					}
+
+					if (reacheableByLight) {
+						context.beginPath();
+						context.moveTo(lights[0][0], lights[0][1]);
+						context.lineTo(node[0], node[1]);
+						context.stroke();
+					}
+				}
+			}
+
+			function mainLoop () {
+				requestAnimationFrame(mainLoop);
+				var now = Date.now(),
+					delta = now - timePreviousFrame;
+
+				// cap the refresh to a defined FPS
+				if (delta > interval) {
+					timePreviousFrame = now - (delta % interval);
+
+					context.clearRect(0, 0, canvas.width, canvas.height);
+
+					context.strokeStyle = 'black';
+					for (let polygon of polygons) {
+						drawPolygon(polygon);
+					}
+
+					context.strokeStyle = 'green';
+					context.fillStyle = 'yellow';
+					for (let light of lights) {
+						drawLight(light);
+					}
+
+					generateShadows();
+				}
+			}
+
+			document.addEventListener('mousemove', function (e) {
+				let rect = canvas.getBoundingClientRect();
+				let x = e.clientX - rect.left;
+				let y = e.clientY - rect.top;
+
+				lights[0][0] = x;
+				lights[0][1] = y;
+			});
+
+			timePreviousFrame = Date.now();
+			mainLoop();
+		</script>
+	</body>
+</html>
