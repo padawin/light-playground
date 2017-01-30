@@ -69,7 +69,15 @@
 				s = (-segment1Y * (segment1[0][0] - segment2[0][0]) + segment1X * (segment1[0][1] - segment2[0][1])) / (-segment2X * segment1Y + segment1X * segment2Y);
 				t = ( segment2X * (segment1[0][1] - segment2[0][1]) - segment2Y * (segment1[0][0] - segment2[0][0])) / (-segment2X * segment1Y + segment1X * segment2Y);
 
-				return s >= 0 && s <= 1 && t >= 0 && t <= 1;
+				if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+					return {
+						x: segment1[0][0] + (t * segment1X),
+						y: segment1[0][1] + (t * segment1Y)
+					};
+				}
+				else {
+					return null;
+				}
 			}
 
 			function lightRayIntersectsPolygon(lightRay, polygon) {
