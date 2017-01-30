@@ -110,12 +110,30 @@
 					}
 
 					if (reacheableByLight) {
-						context.beginPath();
-						context.moveTo(lights[0][0], lights[0][1]);
-						context.lineTo(node[0], node[1]);
-						context.stroke();
+						shadowEdge.push([
+							node[0],
+							node[1],
+							Math.atan2(
+								node[1] - lights[0][1],
+								node[0] - lights[0][0]
+							)
+						]);
 					}
 				}
+
+				shadowEdge.sort(function (a, b) {
+					return a[2] - b[2];
+				});
+
+				context.beginPath();
+				context.moveTo(
+					shadowEdge[shadowEdge.length - 1][0],
+					shadowEdge[shadowEdge.length - 1][1]
+				);
+				for (let node of shadowEdge) {
+					context.lineTo(node[0], node[1]);
+				}
+				context.stroke();
 			}
 
 			function mainLoop () {
