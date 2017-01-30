@@ -98,6 +98,7 @@
 			}
 
 			function generateShadows() {
+				let shadowEdge = [];
 				for (let node of nodes) {
 					let reacheableByLight = true;
 					let lightRay = [lights[0], node];
@@ -125,6 +126,23 @@
 					return a[2] - b[2];
 				});
 
+				return shadowEdge;
+			}
+
+			function drawPolygons(polygons) {
+				context.strokeStyle = 'black';
+				for (let polygon of polygons) {
+					drawPolygon(polygon);
+				}
+
+				context.strokeStyle = 'green';
+				context.fillStyle = 'yellow';
+				for (let light of lights) {
+					drawLight(light);
+				}
+			}
+
+			function drawShadow(shadowEdge) {
 				context.beginPath();
 				context.moveTo(
 					shadowEdge[shadowEdge.length - 1][0],
@@ -145,20 +163,12 @@
 				if (delta > interval) {
 					timePreviousFrame = now - (delta % interval);
 
+					let shadowEdge = generateShadows();
+
+
 					context.clearRect(0, 0, canvas.width, canvas.height);
-
-					context.strokeStyle = 'black';
-					for (let polygon of polygons) {
-						drawPolygon(polygon);
-					}
-
-					context.strokeStyle = 'green';
-					context.fillStyle = 'yellow';
-					for (let light of lights) {
-						drawLight(light);
-					}
-
-					generateShadows();
+					drawPolygons(polygons);
+					drawShadow(shadowEdge);
 				}
 			}
 
