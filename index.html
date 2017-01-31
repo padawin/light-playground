@@ -58,21 +58,29 @@
 				context.fill();
 			}
 
-			function segmentsIntersect(segment1, segment2) {
-				let segment1X, segment1Y, segment2X, segment2Y;
-				segment1X = segment1[1][0] - segment1[0][0];
-				segment1Y = segment1[1][1] - segment1[0][1];
-				segment2X = segment2[1][0] - segment2[0][0];
-				segment2Y = segment2[1][1] - segment2[0][1];
+			function getRaySegmentIntersection(ray, segment) {
+				let rayX, rayY, segmentX, segmentY;
+				rayX = ray[1][0] - ray[0][0];
+				rayY = ray[1][1] - ray[0][1];
+				segmentX = segment[1][0] - segment[0][0];
+				segmentY = segment[1][1] - segment[0][1];
+
+				// parallel, ignore
+				if (rayY / rayX == segmentY / segmentX) {
+					return null;
+				}
 
 				let s, t;
-				s = (-segment1Y * (segment1[0][0] - segment2[0][0]) + segment1X * (segment1[0][1] - segment2[0][1])) / (-segment2X * segment1Y + segment1X * segment2Y);
-				t = ( segment2X * (segment1[0][1] - segment2[0][1]) - segment2Y * (segment1[0][0] - segment2[0][0])) / (-segment2X * segment1Y + segment1X * segment2Y);
+				s = (-rayY * (ray[0][0] - segment[0][0]) + rayX * (ray[0][1] - segment[0][1])) / (-segmentX * rayY + rayX * segmentY);
+				t = ( segmentX * (ray[0][1] - segment[0][1]) - segmentY * (ray[0][0] - segment[0][0])) / (-segmentX * rayY + rayX * segmentY);
 
-				if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+				if (s >= 0 && s <= 1 && t >= 0) {
 					return {
-						x: segment1[0][0] + (t * segment1X),
-						y: segment1[0][1] + (t * segment1Y)
+						param: t,
+						point: [
+							ray[0][0] + (t * rayX),
+							ray[0][1] + (t * rayY)
+						]
 					};
 				}
 				else {
@@ -80,41 +88,49 @@
 				}
 			}
 
-			function lightRayIntersectsPolygon(lightRay, polygon) {
-				for (let nodeIndex = 0; nodeIndex < polygon.length; ++nodeIndex) {
-					let node1 = polygon[nodeIndex];
-					let node2 = polygon[(nodeIndex + 1) % polygon.length];
-					if (node1 == lightRay[1] || node2 == lightRay[1]) {
-						continue;
-					}
-
-					let edge = [node1, node2];
-					if (segmentsIntersect(edge, lightRay)) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-
 			function generateShadows() {
 				let shadowEdge = [];
 				for (let node of nodes) {
-					let reacheableByLight = true;
 					let lightRay = [lights[0], node];
-					polygons:
-					for (let polygon of polygons) {
-						if (lightRayIntersectsPolygon(lightRay, polygon)) {
-							reacheableByLight = false;
-							break;
+					let closestSegment = null;
+					let exactIntersections = [];
+					let intersections = [];
+					// find which is the closest segment the ray is touching
+					for (let segment of polygons) {
+						let intersectionPoint = getRaySegmentIntersection(
+							lightRay,
+							segment
+						);
+
+						if (!intersectionPoint) {
+							continue;
+						}
+
+						// intersecting exactly at the end of the segment (the
+						// intersection is the current node)
+						if (intersectionPoint.param == 1) {
+							exactIntersections.push(intersectionPoint);
+						}
+						// intersection at the middle of the segment
+						else {
+							intersections.push(intersectionPoint);
+						}
+
+						if (!closestSegment || closestSegment.param > intersectionPoint.param) {
+							closestSegment = intersectionPoint;
 						}
 					}
 
-					if (reacheableByLight) {
-						shadowEdge.push([
-							node[0],
-							node[1]
-						]);
+					// the ray is passing by a polygon corner and has a single
+					// other intersection (eg one of the screen borders)
+					// add both intersections to make the ray reach the screen
+					// edge
+					if (exactIntersections.length == 2 && intersections.length == 1) {
+						shadowEdge.push(intersections[0].point);
+						shadowEdge.push(exactIntersections[0].point);
+					}
+					else {
+						shadowEdge.push(closestSegment.point);
 					}
 				}
 
