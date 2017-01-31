@@ -31,40 +31,26 @@
 			];
 
 			let polygons = [
-				[
-					nodes[0],
-					nodes[1],
-					nodes[2],
-					nodes[3]
-				],
-				[
-					nodes[4],
-					nodes[5],
-					nodes[6],
-					nodes[7],
-					nodes[8]
-				],
-				[
-					nodes[9],
-					nodes[10],
-					nodes[11],
-					nodes[12]
-				]
+				[nodes[0], nodes[1]],
+				[nodes[1], nodes[2]],
+				[nodes[2], nodes[3]],
+				[nodes[3], nodes[0]],
+
+				[nodes[4], nodes[5]],
+				[nodes[5], nodes[6]],
+				[nodes[6], nodes[7]],
+				[nodes[7], nodes[8]],
+				[nodes[8], nodes[4]],
+
+				[nodes[9], nodes[10]],
+				[nodes[10], nodes[11]],
+				[nodes[11], nodes[12]],
+				[nodes[12], nodes[9]]
 			];
 
 			let lights = [
 				[150, 150]
 			];
-
-			function drawPolygon(polygon) {
-				context.beginPath();
-				context.moveTo(polygon[0], polygon[1]);
-				for (let node of polygon) {
-					context.lineTo(node[0], node[1]);
-				}
-				context.closePath();
-				context.stroke();
-			}
 
 			function drawLight(light) {
 				context.beginPath();
@@ -145,9 +131,12 @@
 
 			function drawPolygons(polygons) {
 				context.strokeStyle = 'black';
+				context.beginPath();
 				for (let polygon of polygons) {
-					drawPolygon(polygon);
+					context.moveTo(polygon[0][0], polygon[0][1]);
+					context.lineTo(polygon[1][0], polygon[1][1]);
 				}
+				context.stroke();
 
 				context.strokeStyle = 'green';
 				context.fillStyle = 'yellow';
