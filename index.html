@@ -152,12 +152,10 @@
 
 			function drawShadow(shadowEdge) {
 				context.beginPath();
-				context.moveTo(
-					shadowEdge[shadowEdge.length - 1][0],
-					shadowEdge[shadowEdge.length - 1][1]
-				);
 				for (let node of shadowEdge) {
+					context.moveTo(lights[0][0], lights[0][1]);
 					context.lineTo(node[0], node[1]);
+					context.arc(node[0], node[1], 2, 0, 2 * Math.PI, false);
 				}
 				context.stroke();
 			}
