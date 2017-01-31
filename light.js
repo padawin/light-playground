@@ -136,7 +136,7 @@
 				a[1] - lights[0][1],
 				a[0] - lights[0][0]
 			);
-			angle1 = Math.atan2(
+			angle2 = Math.atan2(
 				b[1] - lights[0][1],
 				b[0] - lights[0][0]
 			);
