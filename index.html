@@ -113,17 +113,22 @@
 					if (reacheableByLight) {
 						shadowEdge.push([
 							node[0],
-							node[1],
-							Math.atan2(
-								node[1] - lights[0][1],
-								node[0] - lights[0][0]
-							)
+							node[1]
 						]);
 					}
 				}
 
 				shadowEdge.sort(function (a, b) {
-					return a[2] - b[2];
+					let angle1, angle2;
+					angle1 = Math.atan2(
+						a[1] - lights[0][1],
+						a[0] - lights[0][0]
+					);
+					angle1 = Math.atan2(
+						b[1] - lights[0][1],
+						b[0] - lights[0][0]
+					);
+					return angle1 - angle2;
 				});
 
 				return shadowEdge;
