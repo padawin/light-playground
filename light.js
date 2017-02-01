@@ -26,7 +26,7 @@
 
 	];
 
-	let polygons = [
+	let segments = [
 		[nodes[0], nodes[1]],
 		[nodes[1], nodes[2]],
 		[nodes[2], nodes[3]],
@@ -92,7 +92,7 @@
 			let exactIntersections = [];
 			let intersections = [];
 			// find which is the closest segment the ray is touching
-			for (let segment of polygons) {
+			for (let segment of segments) {
 				let intersectionPoint = getRaySegmentIntersection(
 					lightRay,
 					segment
@@ -146,12 +146,12 @@
 		return shadowEdge;
 	}
 
-	function drawPolygons(polygons) {
+	function drawSegments(segments) {
 		context.strokeStyle = 'black';
 		context.beginPath();
-		for (let polygon of polygons) {
-			context.moveTo(polygon[0][0], polygon[0][1]);
-			context.lineTo(polygon[1][0], polygon[1][1]);
+		for (let segment of segments) {
+			context.moveTo(segment[0][0], segment[0][1]);
+			context.lineTo(segment[1][0], segment[1][1]);
 		}
 		context.stroke();
 
@@ -185,7 +185,7 @@
 
 
 			context.clearRect(0, 0, canvas.width, canvas.height);
-			drawPolygons(polygons);
+			drawSegments(segments);
 			drawShadow(shadowEdge);
 		}
 	}
