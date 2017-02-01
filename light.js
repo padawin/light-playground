@@ -109,6 +109,9 @@
 	function generateShadows() {
 		let shadowEdge = [];
 		for (let node of nodes) {
+			if (getPointKey(lights[0]) == getPointKey(node)) {
+				continue;
+			}
 			let shadowNodes = generateLightToNodeShadow(lights[0], node);
 			for (shadowNode of shadowNodes) {
 				shadowEdge.push(shadowNode);
