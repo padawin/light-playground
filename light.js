@@ -205,7 +205,6 @@
 
 			let shadowEdge = generateShadows();
 
-
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			drawSegments(segments);
 			drawShadow(shadowEdge);
