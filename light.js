@@ -212,7 +212,7 @@
 		}
 	}
 
-	document.addEventListener('mousemove', function (e) {
+	canvas.addEventListener('mousemove', function (e) {
 		let rect = canvas.getBoundingClientRect();
 		let x = e.clientX - rect.left;
 		let y = e.clientY - rect.top;
