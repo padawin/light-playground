@@ -85,13 +85,16 @@
 		}
 	}
 
+	function getPointKey(point) {
+		return point[0] + '-' + point[1];
+	}
+
 	function generateShadows() {
 		let shadowEdge = [];
 		for (let node of nodes) {
 			let lightRay = [lights[0], node];
 			let closestSegment = null;
-			let exactIntersections = [];
-			let intersections = [];
+			let exactIntersections = {};
 			// find which is the closest segment the ray is touching
 			for (let segment of segments) {
 				let intersectionPoint = getRaySegmentIntersection(
@@ -103,32 +106,43 @@
 					continue;
 				}
 
+				let canBeClosest = true;
 				// intersecting exactly at the end of the segment (the
 				// intersection is the current node)
 				if (intersectionPoint.param == 1) {
-					exactIntersections.push(intersectionPoint);
-				}
-				// intersection at the middle of the segment
-				else {
-					intersections.push(intersectionPoint);
+					let pointKey = getPointKey(intersectionPoint.point);
+					// get the other extremity of the segment
+					if (getPointKey(segment[0]) == pointKey) {
+						intersectionPoint.segmentEnd = segment[1];
+					}
+					else {
+						intersectionPoint.segmentEnd = segment[0];
+					}
+
+					// the light ray already passed by a segment sharing a common
+					// point
+					if (!(pointKey in exactIntersections)) {
+						canBeClosest = false;
+						exactIntersections[pointKey] = intersectionPoint;
+					}
+					else {
+						let sideSegment = getPointSideFromLine(lightRay, intersectionPoint.segmentEnd);
+						let sidePrevSegment = getPointSideFromLine(lightRay, exactIntersections[pointKey].segmentEnd);
+						if (sideSegment != sidePrevSegment) {
+							delete exactIntersections[pointKey];
+						}
+						else {
+							canBeClosest = false;
+						}
+					}
 				}
 
-				if (!closestSegment || closestSegment.param > intersectionPoint.param) {
+				if (canBeClosest && (!closestSegment || closestSegment.param > intersectionPoint.param)) {
 					closestSegment = intersectionPoint;
 				}
 			}
 
-			// the ray is passing by a polygon corner and has a single
-			// other intersection (eg one of the screen borders)
-			// add both intersections to make the ray reach the screen
-			// edge
-			if (exactIntersections.length == 2 && intersections.length == 1) {
-				shadowEdge.push(intersections[0].point);
-				shadowEdge.push(exactIntersections[0].point);
-			}
-			else {
-				shadowEdge.push(closestSegment.point);
-			}
+			shadowEdge.push(closestSegment.point);
 		}
 
 		shadowEdge.sort(function (a, b) {
@@ -145,6 +159,13 @@
 		});
 
 		return shadowEdge;
+	}
+
+	function getPointSideFromLine(line, point) {
+		let lineDeltaX = line[1][0] - line[0][0];
+		let lineDeltaY = line[1][1] - line[0][1];
+		let side = lineDeltaX * (point[1] - line[0][1]) - lineDeltaY * (point[0] - line[0][0]);
+		return side && side / Math.abs(side);
 	}
 
 	function drawSegments(segments) {
