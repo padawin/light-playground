@@ -49,12 +49,18 @@
 		[150, 150]
 	];
 
+	/**
+	 * Draw a "bulb", just a disc
+	 */
 	function drawLight(light) {
 		context.beginPath();
 		context.arc(light[0], light[1], 5, 0, 2 * Math.PI, false);
 		context.fill();
 	}
 
+	/**
+	 * Get the intersection coordinates between a ray (semi line) and a segment
+	 */
 	function getRaySegmentIntersection(ray, segment) {
 		let rayX, rayY, segmentX, segmentY;
 		rayX = ray[1][0] - ray[0][0];
@@ -85,10 +91,18 @@
 		}
 	}
 
+	/**
+	 * Get a string identifier of a point (coordinates of the point
+	 * concatenated)
+	 */
 	function getPointKey(point) {
 		return point[0] + '-' + point[1];
 	}
 
+	/**
+	 * Generates the rays of lights and the area in shadow based on the position
+	 * of the ligh and the segments.
+	 */
 	function generateShadows() {
 		let shadowEdge = [];
 		for (let node of nodes) {
@@ -161,6 +175,10 @@
 		return shadowEdge;
 	}
 
+	/**
+	 * Returns -1 of the point is on a side of the line, 0 if they are aligned
+	 * or 1 if the point is on the other side.
+	 */
 	function getPointSideFromLine(line, point) {
 		let lineDeltaX = line[1][0] - line[0][0];
 		let lineDeltaY = line[1][1] - line[0][1];
@@ -168,6 +186,9 @@
 		return side && side / Math.abs(side);
 	}
 
+	/**
+	 * Method to draw all the segments
+	 */
 	function drawSegments(segments) {
 		context.strokeStyle = 'black';
 		context.beginPath();
@@ -184,6 +205,9 @@
 		}
 	}
 
+	/**
+	 * Method to draw the shadows, for the moment draws the light rays (ha!)
+	 */
 	function drawShadow(shadowEdge) {
 		context.beginPath();
 		for (let node of shadowEdge) {
