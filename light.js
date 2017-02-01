@@ -187,13 +187,17 @@
 
 		let returnValues = [];
 		for (let key in exactIntersections) {
-			if (exactIntersections.hasOwnProperty(key)
+			if (closestSegment
+				&&exactIntersections.hasOwnProperty(key)
 				&& exactIntersections[key].param < closestSegment.param
 			) {
 				returnValues.push(exactIntersections[key].point);
 			}
 		}
-		returnValues.push(closestSegment.point);
+
+		if (closestSegment) {
+			returnValues.push(closestSegment.point);
+		}
 
 		return returnValues;
 	}
