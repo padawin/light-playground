@@ -4,6 +4,7 @@
 	let timePreviousFrame,
 		maxFPS = 60,
 		interval = 1000 / maxFPS;
+	let needsRefresh = true;
 
 	let nodes = [
 		// polygon 1
@@ -178,7 +179,7 @@
 			delta = now - timePreviousFrame;
 
 		// cap the refresh to a defined FPS
-		if (delta > interval) {
+		if (delta > interval && needsRefresh) {
 			timePreviousFrame = now - (delta % interval);
 
 			let shadowEdge = generateShadows();
@@ -187,6 +188,7 @@
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			drawSegments(segments);
 			drawShadow(shadowEdge);
+			needsRefresh = false;
 		}
 	}
 
@@ -197,6 +199,8 @@
 
 		lights[0][0] = x;
 		lights[0][1] = y;
+
+		needsRefresh = true;
 	});
 
 	timePreviousFrame = Date.now();
