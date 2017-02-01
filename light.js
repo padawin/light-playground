@@ -62,7 +62,7 @@
 	 * Get the intersection coordinates between a ray (semi line) and a segment
 	 */
 	function getRaySegmentIntersection(ray, segment) {
-		let rayX, rayY, segmentX, segmentY;
+		let rayX, rayY, segmentX, segmentY, distXs, distYs, dotProduct;
 		rayX = ray[1][0] - ray[0][0];
 		rayY = ray[1][1] - ray[0][1];
 		segmentX = segment[1][0] - segment[0][0];
@@ -74,8 +74,11 @@
 		}
 
 		let s, t;
-		s = (-rayY * (ray[0][0] - segment[0][0]) + rayX * (ray[0][1] - segment[0][1])) / (-segmentX * rayY + rayX * segmentY);
-		t = ( segmentX * (ray[0][1] - segment[0][1]) - segmentY * (ray[0][0] - segment[0][0])) / (-segmentX * rayY + rayX * segmentY);
+		distXs = ray[0][0] - segment[0][0];
+		distYs = ray[0][1] - segment[0][1];
+		dotProduct = -segmentX * rayY + rayX * segmentY;
+		s = (-rayY * distXs + rayX * distYs) / dotProduct;
+		t = ( segmentX * distYs - segmentY * distXs) / dotProduct;
 
 		if (s >= 0 && s <= 1 && t >= 0) {
 			return {
