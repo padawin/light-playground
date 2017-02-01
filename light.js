@@ -109,57 +109,10 @@
 	function generateShadows() {
 		let shadowEdge = [];
 		for (let node of nodes) {
-			let lightRay = [lights[0], node];
-			let closestSegment = null;
-			let exactIntersections = {};
-			// find which is the closest segment the ray is touching
-			for (let segment of segments) {
-				let intersectionPoint = getRaySegmentIntersection(
-					lightRay,
-					segment
-				);
-
-				if (!intersectionPoint) {
-					continue;
-				}
-
-				let canBeClosest = true;
-				// intersecting exactly at the end of the segment (the
-				// intersection is the current node)
-				if (intersectionPoint.param == 1) {
-					let pointKey = getPointKey(intersectionPoint.point);
-					// get the other extremity of the segment
-					if (getPointKey(segment[0]) == pointKey) {
-						intersectionPoint.segmentEnd = segment[1];
-					}
-					else {
-						intersectionPoint.segmentEnd = segment[0];
-					}
-
-					// the light ray already passed by a segment sharing a common
-					// point
-					if (!(pointKey in exactIntersections)) {
-						canBeClosest = false;
-						exactIntersections[pointKey] = intersectionPoint;
-					}
-					else {
-						let sideSegment = getPointSideFromLine(lightRay, intersectionPoint.segmentEnd);
-						let sidePrevSegment = getPointSideFromLine(lightRay, exactIntersections[pointKey].segmentEnd);
-						if (sideSegment != sidePrevSegment) {
-							delete exactIntersections[pointKey];
-						}
-						else {
-							canBeClosest = false;
-						}
-					}
-				}
-
-				if (canBeClosest && (!closestSegment || closestSegment.param > intersectionPoint.param)) {
-					closestSegment = intersectionPoint;
-				}
+			let shadowNodes = generateLightToNodeShadow(lights[0], node);
+			for (shadowNode of shadowNodes) {
+				shadowEdge.push(shadowNode);
 			}
-
-			shadowEdge.push(closestSegment.point);
 		}
 
 		shadowEdge.sort(function (a, b) {
@@ -176,6 +129,70 @@
 		});
 
 		return shadowEdge;
+	}
+
+	function generateLightToNodeShadow(light, node) {
+		let lightRay = [light, node];
+		let closestSegment = null;
+		let exactIntersections = {};
+		// find which is the closest segment the ray is touching
+		for (let segment of segments) {
+			let intersectionPoint = getRaySegmentIntersection(
+				lightRay,
+				segment
+			);
+
+			if (!intersectionPoint) {
+				continue;
+			}
+
+			let canBeClosest = true;
+			// intersecting exactly at the end of the segment (the
+			// intersection is the current node)
+			if (intersectionPoint.param == 1) {
+				let pointKey = getPointKey(intersectionPoint.point);
+				// get the other extremity of the segment
+				if (getPointKey(segment[0]) == pointKey) {
+					intersectionPoint.segmentEnd = segment[1];
+				}
+				else {
+					intersectionPoint.segmentEnd = segment[0];
+				}
+
+				// the light ray already passed by a segment sharing a common
+				// point
+				if (!(pointKey in exactIntersections)) {
+					canBeClosest = false;
+					exactIntersections[pointKey] = intersectionPoint;
+				}
+				else {
+					let sideSegment = getPointSideFromLine(lightRay, intersectionPoint.segmentEnd);
+					let sidePrevSegment = getPointSideFromLine(lightRay, exactIntersections[pointKey].segmentEnd);
+					if (sideSegment != sidePrevSegment) {
+						delete exactIntersections[pointKey];
+					}
+					else {
+						canBeClosest = false;
+					}
+				}
+			}
+
+			if (canBeClosest && (!closestSegment || closestSegment.param > intersectionPoint.param)) {
+				closestSegment = intersectionPoint;
+			}
+		}
+
+		let returnValues = [];
+		for (let key in exactIntersections) {
+			if (exactIntersections.hasOwnProperty(key)
+				&& exactIntersections[key].param < closestSegment.param
+			) {
+				returnValues.push(exactIntersections[key].point);
+			}
+		}
+		returnValues.push(closestSegment.point);
+
+		return returnValues;
 	}
 
 	/**
