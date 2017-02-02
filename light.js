@@ -65,13 +65,15 @@
 			if (getPointKey(node) == getPointKey(lights[0])) {
 				continue;
 			}
-			let angle = Math.atan2(
+			node.angle = Math.atan2(
 				node.y - lights[0].y,
 				node.x - lights[0].x
 			);
-			rays.push([lights[0], {x: Math.cos(angle - 0.00001), y: Math.sin(angle - 0.00001)}]);
+			let nodeSide1Angle = node.angle - 0.00001;
+			let nodeSide2Angle = node.angle + 0.00001;
+			rays.push([lights[0], {angle: nodeSide1Angle, x: Math.cos(nodeSide1Angle), y: Math.sin(nodeSide1Angle)}]);
 			rays.push([lights[0], node]);
-			rays.push([lights[0], {x: Math.cos(angle + 0.00001), y: Math.sin(angle + 0.00001)}]);
+			rays.push([lights[0], {angle: nodeSide2Angle, x: Math.cos(nodeSide2Angle), y: Math.sin(nodeSide2Angle)}]);
 		}
 
 		return rays;
