@@ -8,22 +8,22 @@
 
 	let nodes = [
 		// polygon 1
-		[10, 10],
-		[70, 10],
-		[70, 100],
-		[10, 100],
+		{x: 10, y: 10},
+		{x: 70, y: 10},
+		{x: 70, y: 100},
+		{x: 10, y: 100},
 
 		// polygon 2
-		[130, 30],
-		[140, 40],
-		[120, 110],
-		[120, 80],
-		[90, 60],
+		{x: 130, y: 30},
+		{x: 140, y: 40},
+		{x: 120, y: 110},
+		{x: 120, y: 80},
+		{x: 90, y: 60},
 		// border
-		[0, 0],
-		[canvas.width, 0],
-		[canvas.width, canvas.height],
-		[0, canvas.height]
+		{x: 0, y: 0},
+		{x: canvas.width, y: 0},
+		{x: canvas.width, y: canvas.height},
+		{x: 0, y: canvas.height}
 
 	];
 
@@ -46,7 +46,7 @@
 	];
 
 	let lights = [
-		[150, 150]
+		{x: 150, y: 150}
 	];
 
 	/**
@@ -54,7 +54,7 @@
 	 */
 	function drawLight(light) {
 		context.beginPath();
-		context.arc(light[0], light[1], 5, 0, 2 * Math.PI, false);
+		context.arc(light.x, light.y, 5, 0, 2 * Math.PI, false);
 		context.fill();
 	}
 
@@ -63,10 +63,10 @@
 	 */
 	function getRaySegmentIntersection(ray, segment) {
 		let rayX, rayY, segmentX, segmentY, distXs, distYs, dotProduct;
-		rayX = ray[1][0] - ray[0][0];
-		rayY = ray[1][1] - ray[0][1];
-		segmentX = segment[1][0] - segment[0][0];
-		segmentY = segment[1][1] - segment[0][1];
+		rayX = ray[1].x - ray[0].x;
+		rayY = ray[1].y - ray[0].y;
+		segmentX = segment[1].x - segment[0].x;
+		segmentY = segment[1].y - segment[0].y;
 
 		// parallel, ignore
 		if (rayY / rayX == segmentY / segmentX) {
@@ -74,8 +74,8 @@
 		}
 
 		let s, t;
-		distXs = ray[0][0] - segment[0][0];
-		distYs = ray[0][1] - segment[0][1];
+		distXs = ray[0].x - segment[0].x;
+		distYs = ray[0].y - segment[0].y;
 		dotProduct = -segmentX * rayY + rayX * segmentY;
 		s = (-rayY * distXs + rayX * distYs) / dotProduct;
 		t = ( segmentX * distYs - segmentY * distXs) / dotProduct;
@@ -83,10 +83,10 @@
 		if (s >= 0 && s <= 1 && t >= 0) {
 			return {
 				param: t,
-				point: [
-					ray[0][0] + (t * rayX),
-					ray[0][1] + (t * rayY)
-				]
+				point: {
+					x: ray[0].x + (t * rayX),
+					y: ray[0].y + (t * rayY)
+				}
 			};
 		}
 		else {
@@ -99,7 +99,7 @@
 	 * concatenated)
 	 */
 	function getPointKey(point) {
-		return point[0] + '-' + point[1];
+		return point.x + '-' + point.y;
 	}
 
 	/**
@@ -121,12 +121,12 @@
 		shadowEdge.sort(function (a, b) {
 			let angle1, angle2;
 			angle1 = Math.atan2(
-				a[1] - lights[0][1],
-				a[0] - lights[0][0]
+				a.y - lights[0].y,
+				a.x - lights[0].x
 			);
 			angle2 = Math.atan2(
-				b[1] - lights[0][1],
-				b[0] - lights[0][0]
+				b.y - lights[0].y,
+				b.x - lights[0].x
 			);
 			return angle1 - angle2;
 		});
@@ -207,9 +207,9 @@
 	 * or 1 if the point is on the other side.
 	 */
 	function getPointSideFromLine(line, point) {
-		let lineDeltaX = line[1][0] - line[0][0];
-		let lineDeltaY = line[1][1] - line[0][1];
-		let side = lineDeltaX * (point[1] - line[0][1]) - lineDeltaY * (point[0] - line[0][0]);
+		let lineDeltaX = line[1].x - line[0].x;
+		let lineDeltaY = line[1].y - line[0].y;
+		let side = lineDeltaX * (point.y - line[0].y) - lineDeltaY * (point.x - line[0].x);
 		return side && side / Math.abs(side);
 	}
 
@@ -220,8 +220,8 @@
 		context.strokeStyle = 'black';
 		context.beginPath();
 		for (let segment of segments) {
-			context.moveTo(segment[0][0], segment[0][1]);
-			context.lineTo(segment[1][0], segment[1][1]);
+			context.moveTo(segment[0].x, segment[0].y);
+			context.lineTo(segment[1].x, segment[1].y);
 		}
 		context.stroke();
 
@@ -238,9 +238,9 @@
 	function drawShadow(shadowEdge) {
 		context.beginPath();
 		for (let node of shadowEdge) {
-			context.moveTo(lights[0][0], lights[0][1]);
-			context.lineTo(node[0], node[1]);
-			context.arc(node[0], node[1], 2, 0, 2 * Math.PI, false);
+			context.moveTo(lights[0].x, lights[0].y);
+			context.lineTo(node.x, node.y);
+			context.arc(node.x, node.y, 2, 0, 2 * Math.PI, false);
 		}
 		context.stroke();
 	}
@@ -268,8 +268,8 @@
 		let x = e.clientX - rect.left;
 		let y = e.clientY - rect.top;
 
-		lights[0][0] = x;
-		lights[0][1] = y;
+		lights[0].x = x;
+		lights[0].y = y;
 
 		needsRefresh = true;
 	});
