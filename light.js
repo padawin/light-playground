@@ -105,8 +105,8 @@
 			return {
 				param: t,
 				point: {
-					x: ray[0].x + (t * rayX),
-					y: ray[0].y + (t * rayY)
+					x: ray[0].x + Math.round(t * rayX),
+					y: ray[0].y + Math.round(t * rayY)
 				}
 			};
 		}
