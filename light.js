@@ -71,9 +71,17 @@
 			);
 			let nodeSide1Angle = node.angle - 0.00001;
 			let nodeSide2Angle = node.angle + 0.00001;
-			rays.push([lights[0], {angle: nodeSide1Angle, x: Math.cos(nodeSide1Angle), y: Math.sin(nodeSide1Angle)}]);
+			rays.push([lights[0], {
+				angle: nodeSide1Angle,
+				x: node.x + Math.cos(nodeSide1Angle),
+				y: node.y + Math.sin(nodeSide1Angle)
+			}]);
 			rays.push([lights[0], node]);
-			rays.push([lights[0], {angle: nodeSide2Angle, x: Math.cos(nodeSide2Angle), y: Math.sin(nodeSide2Angle)}]);
+			rays.push([lights[0], {
+				angle: nodeSide2Angle,
+				x: node.x + Math.cos(nodeSide2Angle),
+				y: node.y + Math.sin(nodeSide2Angle)
+			}]);
 		}
 
 		return rays;
