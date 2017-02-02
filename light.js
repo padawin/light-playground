@@ -71,17 +71,18 @@
 			);
 			let nodeSide1Angle = node.angle - 0.00001;
 			let nodeSide2Angle = node.angle + 0.00001;
-			rays.push([lights[0], {
-				angle: nodeSide1Angle,
-				x: node.x + Math.cos(nodeSide1Angle),
-				y: node.y + Math.sin(nodeSide1Angle)
-			}]);
-			rays.push([lights[0], node]);
-			rays.push([lights[0], {
-				angle: nodeSide2Angle,
-				x: node.x + Math.cos(nodeSide2Angle),
-				y: node.y + Math.sin(nodeSide2Angle)
-			}]);
+			let ray = [
+				[
+					lights[0],
+					{angle: nodeSide1Angle, x: node.x + Math.cos(nodeSide1Angle), y: node.y + Math.sin(nodeSide1Angle)}
+				],
+				[lights[0], node],
+				[
+					lights[0],
+					{angle: nodeSide2Angle, x: node.x + Math.cos(nodeSide2Angle), y: node.y + Math.sin(nodeSide2Angle)}
+				]
+			];
+			rays.push(ray);
 		}
 
 		return rays;
@@ -138,8 +139,16 @@
 	function generateShadows(lightRays) {
 		let shadowEdge = [];
 		for (let ray of lightRays) {
-			let shadowNode = generateLightToNodeShadow(ray);
-			shadowEdge.push(shadowNode);
+			let shadowNodes = generateLightToNodeShadow(ray);
+			for (let shadowNode in shadowNodes) {
+				if (shadowNode == 1
+					|| shadowNode != 1
+					&& shadowNodes[shadowNode].x != shadowNodes[1].x
+					&& shadowNodes[shadowNode].y != shadowNodes[1].y
+				) {
+					shadowEdge.push(shadowNodes[shadowNode]);
+				}
+			}
 		}
 
 		shadowEdge.sort(function (a, b) {
@@ -149,26 +158,31 @@
 		return shadowEdge;
 	}
 
-	function generateLightToNodeShadow(lightRay) {
-		let closestSegment = null;
-		// find which is the closest segment the ray is touching
-		for (let segment of segments) {
-			let intersectionPoint = getRaySegmentIntersection(
-				lightRay,
-				segment
-			);
+	function generateLightToNodeShadow(lightRays) {
+		let closestLightPoints = [];
+		for (let lightRay of lightRays) {
+			let closestSegment = null;
+			// find which is the closest segment the ray is touching
+			for (let segment of segments) {
+				let intersectionPoint = getRaySegmentIntersection(
+					lightRay,
+					segment
+				);
 
-			if (!intersectionPoint) {
-				continue;
+				if (!intersectionPoint) {
+					continue;
+				}
+
+				if (!closestSegment || closestSegment.param > intersectionPoint.param) {
+					closestSegment = intersectionPoint;
+				}
 			}
 
-			if (!closestSegment || closestSegment.param > intersectionPoint.param) {
-				closestSegment = intersectionPoint;
-			}
+			closestSegment.point.angle = lightRay[1].angle;
+			closestLightPoints.push(closestSegment.point);
 		}
 
-		closestSegment.point.angle = lightRay[1].angle;
-		return closestSegment.point;
+		return closestLightPoints;
 	}
 
 	/**
