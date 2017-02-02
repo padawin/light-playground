@@ -104,7 +104,7 @@
 
 	/**
 	 * Generates the rays of lights and the area in shadow based on the position
-	 * of the ligh and the segments.
+	 * of the light and the segments.
 	 */
 	function generateShadows() {
 		let shadowEdge = [];
