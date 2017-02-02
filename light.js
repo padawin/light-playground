@@ -58,6 +58,23 @@
 		context.fill();
 	}
 
+	function generateLightRays() {
+		let rays = [];
+
+		for (let node of nodes) {
+			if (getPointKey(node) == getPointKey(lights[0])) {
+				continue;
+			}
+			let ray = [
+				lights[0],
+				node
+			];
+			rays.push(ray);
+		}
+
+		return rays;
+	}
+
 	/**
 	 * Get the intersection coordinates between a ray (semi line) and a segment
 	 */
@@ -106,13 +123,10 @@
 	 * Generates the rays of lights and the area in shadow based on the position
 	 * of the light and the segments.
 	 */
-	function generateShadows() {
+	function generateShadows(lightRays) {
 		let shadowEdge = [];
-		for (let node of nodes) {
-			if (getPointKey(lights[0]) == getPointKey(node)) {
-				continue;
-			}
-			let shadowNodes = generateLightToNodeShadow(lights[0], node);
+		for (let ray of lightRays) {
+			let shadowNodes = generateLightToNodeShadow(ray);
 			for (shadowNode of shadowNodes) {
 				shadowEdge.push(shadowNode);
 			}
@@ -134,8 +148,7 @@
 		return shadowEdge;
 	}
 
-	function generateLightToNodeShadow(light, node) {
-		let lightRay = [light, node];
+	function generateLightToNodeShadow(lightRay) {
 		let closestSegment = null;
 		let exactIntersections = {};
 		// find which is the closest segment the ray is touching
@@ -254,7 +267,8 @@
 		if (delta > interval && needsRefresh) {
 			timePreviousFrame = now - (delta % interval);
 
-			let shadowEdge = generateShadows();
+			let lightRays = generateLightRays();
+			let shadowEdge = generateShadows(lightRays);
 
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			drawSegments(segments);
