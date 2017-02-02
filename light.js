@@ -65,11 +65,13 @@
 			if (getPointKey(node) == getPointKey(lights[0])) {
 				continue;
 			}
-			let ray = [
-				lights[0],
-				node
-			];
-			rays.push(ray);
+			let angle = Math.atan2(
+				node.y - lights[0].y,
+				node.x - lights[0].x
+			);
+			rays.push([lights[0], {x: Math.cos(angle - 0.00001), y: Math.sin(angle - 0.00001)}]);
+			rays.push([lights[0], node]);
+			rays.push([lights[0], {x: Math.cos(angle + 0.00001), y: Math.sin(angle + 0.00001)}]);
 		}
 
 		return rays;
@@ -126,10 +128,8 @@
 	function generateShadows(lightRays) {
 		let shadowEdge = [];
 		for (let ray of lightRays) {
-			let shadowNodes = generateLightToNodeShadow(ray);
-			for (shadowNode of shadowNodes) {
-				shadowEdge.push(shadowNode);
-			}
+			let shadowNode = generateLightToNodeShadow(ray);
+			shadowEdge.push(shadowNode);
 		}
 
 		shadowEdge.sort(function (a, b) {
@@ -150,7 +150,6 @@
 
 	function generateLightToNodeShadow(lightRay) {
 		let closestSegment = null;
-		let exactIntersections = {};
 		// find which is the closest segment the ray is touching
 		for (let segment of segments) {
 			let intersectionPoint = getRaySegmentIntersection(
@@ -162,57 +161,12 @@
 				continue;
 			}
 
-			let canBeClosest = true;
-			// intersecting exactly at the end of the segment (the
-			// intersection is the current node)
-			if (intersectionPoint.param == 1) {
-				let pointKey = getPointKey(intersectionPoint.point);
-				// get the other extremity of the segment
-				if (getPointKey(segment[0]) == pointKey) {
-					intersectionPoint.segmentEnd = segment[1];
-				}
-				else {
-					intersectionPoint.segmentEnd = segment[0];
-				}
-
-				// the light ray already passed by a segment sharing a common
-				// point
-				if (!(pointKey in exactIntersections)) {
-					canBeClosest = false;
-					exactIntersections[pointKey] = intersectionPoint;
-				}
-				else {
-					let sideSegment = getPointSideFromLine(lightRay, intersectionPoint.segmentEnd);
-					let sidePrevSegment = getPointSideFromLine(lightRay, exactIntersections[pointKey].segmentEnd);
-					if (sideSegment != sidePrevSegment) {
-						delete exactIntersections[pointKey];
-					}
-					else {
-						canBeClosest = false;
-					}
-				}
-			}
-
-			if (canBeClosest && (!closestSegment || closestSegment.param > intersectionPoint.param)) {
+			if (!closestSegment || closestSegment.param > intersectionPoint.param) {
 				closestSegment = intersectionPoint;
 			}
 		}
 
-		let returnValues = [];
-		for (let key in exactIntersections) {
-			if (closestSegment
-				&&exactIntersections.hasOwnProperty(key)
-				&& exactIntersections[key].param < closestSegment.param
-			) {
-				returnValues.push(exactIntersections[key].point);
-			}
-		}
-
-		if (closestSegment) {
-			returnValues.push(closestSegment.point);
-		}
-
-		return returnValues;
+		return closestSegment.point;
 	}
 
 	/**
