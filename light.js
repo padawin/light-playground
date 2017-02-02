@@ -143,16 +143,7 @@
 		}
 
 		shadowEdge.sort(function (a, b) {
-			let angle1, angle2;
-			angle1 = Math.atan2(
-				a.y - lights[0].y,
-				a.x - lights[0].x
-			);
-			angle2 = Math.atan2(
-				b.y - lights[0].y,
-				b.x - lights[0].x
-			);
-			return angle1 - angle2;
+			return a.angle - b.angle;
 		});
 
 		return shadowEdge;
