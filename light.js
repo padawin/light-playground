@@ -167,6 +167,7 @@
 			}
 		}
 
+		closestSegment.point.angle = lightRay[1].angle;
 		return closestSegment.point;
 	}
 
