@@ -6,6 +6,14 @@
 		interval = 1000 / maxFPS;
 	let needsRefresh = true;
 
+	let screenCorners = [
+		// border
+		{x: 0, y: 0},
+		{x: canvas.width, y: 0},
+		{x: canvas.width, y: canvas.height},
+		{x: 0, y: canvas.height}
+	];
+
 	let nodes = [
 		// polygon 1
 		{x: 10, y: 10},
@@ -18,14 +26,13 @@
 		{x: 140, y: 40},
 		{x: 120, y: 110},
 		{x: 120, y: 80},
-		{x: 90, y: 60},
-		// border
-		{x: 0, y: 0},
-		{x: canvas.width, y: 0},
-		{x: canvas.width, y: canvas.height},
-		{x: 0, y: canvas.height}
-
+		{x: 90, y: 60}
 	];
+
+	nodes.push(screenCorners[0]);
+	nodes.push(screenCorners[1]);
+	nodes.push(screenCorners[2]);
+	nodes.push(screenCorners[3]);
 
 	let segments = [
 		[nodes[0], nodes[1]],
