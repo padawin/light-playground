@@ -92,6 +92,10 @@
 			rays.push(ray);
 		}
 
+		rays.sort(function (a, b) {
+			return a[1][1].angle - b[1][1].angle;
+		});
+
 		return rays;
 	}
 
@@ -157,10 +161,6 @@
 				}
 			}
 		}
-
-		shadowEdge.sort(function (a, b) {
-			return a.angle - b.angle;
-		});
 
 		return shadowEdge;
 	}
