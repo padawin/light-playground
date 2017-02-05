@@ -151,13 +151,13 @@
 		let shadowEdge = [];
 		for (let ray of lightRays) {
 			let shadowNodes = generateLightToNodeShadow(ray);
-			for (let shadowNode in shadowNodes) {
-				if (shadowNode == 1
-					|| shadowNode != 1
-					&& shadowNodes[shadowNode].x != shadowNodes[1].x
-					&& shadowNodes[shadowNode].y != shadowNodes[1].y
+			for (let nodeIndex in shadowNodes) {
+				if (nodeIndex == 1
+					|| nodeIndex != 1
+					&& shadowNodes[nodeIndex].x != shadowNodes[1].x
+					&& shadowNodes[nodeIndex].y != shadowNodes[1].y
 				) {
-					shadowEdge.push(shadowNodes[shadowNode]);
+					shadowEdge.push(shadowNodes[nodeIndex]);
 				}
 			}
 		}
