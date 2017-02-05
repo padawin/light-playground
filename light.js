@@ -157,7 +157,8 @@
 					&& shadowNodes[nodeIndex].x != shadowNodes[1].x
 					&& shadowNodes[nodeIndex].y != shadowNodes[1].y
 				) {
-					shadowEdge.push(shadowNodes[nodeIndex]);
+					node = shadowNodes[nodeIndex];
+					shadowEdge.push(node);
 				}
 			}
 		}
