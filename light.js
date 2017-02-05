@@ -215,7 +215,6 @@
 		}
 		context.stroke();
 
-		context.strokeStyle = 'green';
 		context.fillStyle = 'yellow';
 		for (let light of lights) {
 			drawLight(light);
@@ -226,6 +225,7 @@
 	 * Method to draw the shadows, for the moment draws the light rays (ha!)
 	 */
 	function drawShadow(shadowEdge) {
+		context.strokeStyle = 'green';
 		context.beginPath();
 		for (let node of shadowEdge) {
 			context.moveTo(lights[0].x, lights[0].y);
