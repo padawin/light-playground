@@ -224,7 +224,7 @@
 	/**
 	 * Method to draw the shadows, for the moment draws the light rays (ha!)
 	 */
-	function drawShadow(shadowEdge) {
+	function drawLightRays(shadowEdge) {
 		context.strokeStyle = 'green';
 		context.beginPath();
 		for (let node of shadowEdge) {
@@ -249,7 +249,7 @@
 
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			drawSegments(segments);
-			drawShadow(shadowEdge);
+			drawLightRays(shadowEdge);
 			needsRefresh = false;
 		}
 	}
