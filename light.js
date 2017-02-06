@@ -154,8 +154,9 @@
 			for (let nodeIndex in shadowNodes) {
 				if (nodeIndex == 1
 					|| nodeIndex != 1
-					&& shadowNodes[nodeIndex].x != shadowNodes[1].x
-					&& shadowNodes[nodeIndex].y != shadowNodes[1].y
+					&& (shadowNodes[nodeIndex].x != shadowNodes[1].x
+						|| shadowNodes[nodeIndex].y != shadowNodes[1].y
+					)
 				) {
 					node = shadowNodes[nodeIndex];
 					shadowEdge.push(node);
