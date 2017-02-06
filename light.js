@@ -81,12 +81,12 @@
 			let ray = [
 				[
 					lights[0],
-					{angle: nodeSide1Angle, x: node.x + Math.cos(nodeSide1Angle), y: node.y + Math.sin(nodeSide1Angle)}
+					{angle: nodeSide1Angle, x: lights[0].x + Math.cos(nodeSide1Angle), y: lights[0].y + Math.sin(nodeSide1Angle)}
 				],
 				[lights[0], node],
 				[
 					lights[0],
-					{angle: nodeSide2Angle, x: node.x + Math.cos(nodeSide2Angle), y: node.y + Math.sin(nodeSide2Angle)}
+					{angle: nodeSide2Angle, x: lights[0].x + Math.cos(nodeSide2Angle), y: lights[0].y + Math.sin(nodeSide2Angle)}
 				]
 			];
 			rays.push(ray);
