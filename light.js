@@ -168,7 +168,7 @@
 	}
 
 	function generateLightToNodeShadow(lightRays) {
-		let closestLightPoints = [];
+		let lightPoints = [];
 		for (let lightRay of lightRays) {
 			let closestSegment = null;
 			// find which is the closest segment the ray is touching
@@ -188,10 +188,10 @@
 			}
 
 			closestSegment.point.angle = lightRay[1].angle;
-			closestLightPoints.push(closestSegment.point);
+			lightPoints.push(closestSegment.point);
 		}
 
-		return closestLightPoints;
+		return lightPoints;
 	}
 
 	/**
