@@ -149,6 +149,8 @@
 	 */
 	function generateShadows(lightRays) {
 		let shadowEdge = [];
+		let polygon = [];
+		let lastNodeOnEdge = null;
 		for (let ray of lightRays) {
 			let shadowNodes = generateLightToNodeShadow(ray);
 			for (let nodeIndex in shadowNodes) {
@@ -159,12 +161,46 @@
 					)
 				) {
 					node = shadowNodes[nodeIndex];
-					shadowEdge.push(node);
+					let nodeOnEdge = isNodeOnScreenEdge(node);
+					if (nodeOnEdge) {
+						lastNodeOnEdge = node;
+						if (polygon.length) {
+							polygon.push(node);
+							shadowEdge.push(polygon);
+							polygon = [];
+						}
+					}
+					else {
+						if (lastNodeOnEdge) {
+							polygon.push(lastNodeOnEdge);
+							lastNodeOnEdge = null;
+						}
+						polygon.push(node);
+					}
 				}
 			}
 		}
 
+		if (polygon.length) {
+			shadowEdge[0] = polygon.concat(shadowEdge[0] || []);
+		}
+
 		return shadowEdge;
+	}
+
+	function isNodeOnScreenEdge(node) {
+		for (let cornerIndex = 0; cornerIndex < screenCorners.length; ++cornerIndex) {
+			let edge = [
+				screenCorners[cornerIndex],
+				screenCorners[(cornerIndex + 1) % screenCorners.length]
+			];
+			let sideOfEdge = getPointSideFromLine(edge, node);
+			if (sideOfEdge == 0) {
+				return edge;
+			}
+		}
+
+		return false;
 	}
 
 	function generateLightToNodeShadow(lightRays) {
@@ -224,17 +260,18 @@
 	}
 
 	/**
-	 * Method to draw the shadows, for the moment draws the light rays (ha!)
+	 * Method to draw the shadows
 	 */
-	function drawLightRays(shadowEdge) {
-		context.strokeStyle = 'green';
-		context.beginPath();
-		for (let node of shadowEdge) {
-			context.moveTo(lights[0].x, lights[0].y);
-			context.lineTo(node.x, node.y);
-			context.arc(node.x, node.y, 2, 0, 2 * Math.PI, false);
+	function drawShadows(shadowEdge) {
+		context.fillStyle = 'black';
+		for (let polygon of shadowEdge) {
+			context.beginPath();
+			context.moveTo(polygon[0].x, polygon[0].y);
+			for (let node of polygon) {
+				context.lineTo(node.x, node.y);
+			}
+			context.fill();
 		}
-		context.stroke();
 	}
 
 	function mainLoop () {
@@ -250,7 +287,7 @@
 			let lightRays = generateLightRays();
 			let shadowEdge = generateShadows(lightRays);
 			drawSegments(segments);
-			drawLightRays(shadowEdge);
+			drawShadows(shadowEdge);
 			needsRefresh = false;
 		}
 	}
