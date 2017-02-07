@@ -267,9 +267,38 @@
 		for (let polygon of shadowEdge) {
 			context.beginPath();
 			context.moveTo(polygon[0].x, polygon[0].y);
-			for (let node of polygon) {
+			for (let i in polygon) {
+				i = parseInt(i);
+				let node = polygon[i];
+
 				context.lineTo(node.x, node.y);
+
+				let edge = isNodeOnScreenEdge(node);
+				if (i > 0 && edge) {
+					let tmpNode = node;
+					let beginningPolygon = polygon[(i + 1) % polygon.length];
+					while (tmpNode.x != beginningPolygon.x && tmpNode.y != beginningPolygon.y) {
+						// top edge
+						if (tmpNode.x && !tmpNode.y) {
+							tmpNode = {x: 0, y: 0};
+						}
+						// left edge
+						else if (!tmpNode.x && tmpNode.y < canvas.height) {
+							tmpNode = {x: 0, y: canvas.height};
+						}
+						// bottom edge
+						else if (tmpNode.x < canvas.width && tmpNode.y == canvas.height) {
+							tmpNode = {x: canvas.width, y: canvas.height};
+						}
+						// right edge
+						else if (tmpNode.x == canvas.width && tmpNode.y) {
+							tmpNode = {x: canvas.width, y: 0};
+						}
+						context.lineTo(tmpNode.x, tmpNode.y);
+					}
+				}
 			}
+
 			context.fill();
 		}
 	}
