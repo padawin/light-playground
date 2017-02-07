@@ -246,10 +246,9 @@
 		if (delta > interval && needsRefresh) {
 			timePreviousFrame = now - (delta % interval);
 
+			context.clearRect(0, 0, canvas.width, canvas.height);
 			let lightRays = generateLightRays();
 			let shadowEdge = generateShadows(lightRays);
-
-			context.clearRect(0, 0, canvas.width, canvas.height);
 			drawSegments(segments);
 			drawLightRays(shadowEdge);
 			needsRefresh = false;
