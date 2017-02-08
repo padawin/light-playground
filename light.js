@@ -252,7 +252,9 @@
 			context.lineTo(segment[1].x, segment[1].y);
 		}
 		context.stroke();
+	}
 
+	function drawLights() {
 		context.fillStyle = 'yellow';
 		for (let light of lights) {
 			drawLight(light);
@@ -324,6 +326,7 @@
 			let lightRays = generateLightRays(lights[0]);
 			let shadowEdge = generateShadows(lightRays);
 			drawSegments(segments);
+			drawLights();
 			drawShadows(shadowEdge);
 			needsRefresh = false;
 		}
