@@ -65,28 +65,28 @@
 		context.fill();
 	}
 
-	function generateLightRays() {
+	function generateLightRays(light) {
 		let rays = [];
 
 		for (let node of nodes) {
-			if (getPointKey(node) == getPointKey(lights[0])) {
+			if (getPointKey(node) == getPointKey(light)) {
 				continue;
 			}
 			node.angle = Math.atan2(
-				node.y - lights[0].y,
-				node.x - lights[0].x
+				node.y - light.y,
+				node.x - light.x
 			);
 			let nodeSide1Angle = node.angle - 0.00001;
 			let nodeSide2Angle = node.angle + 0.00001;
 			let ray = [
 				[
-					lights[0],
-					{angle: nodeSide1Angle, x: lights[0].x + Math.cos(nodeSide1Angle), y: lights[0].y + Math.sin(nodeSide1Angle)}
+					light,
+					{angle: nodeSide1Angle, x: light.x + Math.cos(nodeSide1Angle), y: light.y + Math.sin(nodeSide1Angle)}
 				],
-				[lights[0], node],
+				[light, node],
 				[
-					lights[0],
-					{angle: nodeSide2Angle, x: lights[0].x + Math.cos(nodeSide2Angle), y: lights[0].y + Math.sin(nodeSide2Angle)}
+					light,
+					{angle: nodeSide2Angle, x: light.x + Math.cos(nodeSide2Angle), y: light.y + Math.sin(nodeSide2Angle)}
 				]
 			];
 			rays.push(ray);
@@ -321,7 +321,7 @@
 			timePreviousFrame = now - (delta % interval);
 
 			context.clearRect(0, 0, canvas.width, canvas.height);
-			let lightRays = generateLightRays();
+			let lightRays = generateLightRays(lights[0]);
 			let shadowEdge = generateShadows(lightRays);
 			drawSegments(segments);
 			drawShadows(shadowEdge);
