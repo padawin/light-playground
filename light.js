@@ -149,6 +149,8 @@
 	 */
 	function generateShadows(lightRays) {
 		let shadowEdge = [];
+		let polygon = [];
+		let lastNodeOnEdge = null;
 		for (let ray of lightRays) {
 			let shadowNodes = generateLightToNodeShadow(ray);
 			for (let nodeIndex in shadowNodes) {
@@ -159,16 +161,50 @@
 					)
 				) {
 					node = shadowNodes[nodeIndex];
-					shadowEdge.push(node);
+					let nodeOnEdge = isNodeOnScreenEdge(node);
+					if (nodeOnEdge) {
+						lastNodeOnEdge = node;
+						if (polygon.length) {
+							polygon.push(node);
+							shadowEdge.push(polygon);
+							polygon = [];
+						}
+					}
+					else {
+						if (lastNodeOnEdge) {
+							polygon.push(lastNodeOnEdge);
+							lastNodeOnEdge = null;
+						}
+						polygon.push(node);
+					}
 				}
 			}
+		}
+
+		if (polygon.length) {
+			shadowEdge[0] = polygon.concat(shadowEdge[0] || []);
 		}
 
 		return shadowEdge;
 	}
 
+	function isNodeOnScreenEdge(node) {
+		for (let cornerIndex = 0; cornerIndex < screenCorners.length; ++cornerIndex) {
+			let edge = [
+				screenCorners[cornerIndex],
+				screenCorners[(cornerIndex + 1) % screenCorners.length]
+			];
+			let sideOfEdge = getPointSideFromLine(edge, node);
+			if (sideOfEdge == 0) {
+				return edge;
+			}
+		}
+
+		return false;
+	}
+
 	function generateLightToNodeShadow(lightRays) {
-		let closestLightPoints = [];
+		let lightPoints = [];
 		for (let lightRay of lightRays) {
 			let closestSegment = null;
 			// find which is the closest segment the ray is touching
@@ -188,10 +224,10 @@
 			}
 
 			closestSegment.point.angle = lightRay[1].angle;
-			closestLightPoints.push(closestSegment.point);
+			lightPoints.push(closestSegment.point);
 		}
 
-		return closestLightPoints;
+		return lightPoints;
 	}
 
 	/**
@@ -224,17 +260,55 @@
 	}
 
 	/**
-	 * Method to draw the shadows, for the moment draws the light rays (ha!)
+	 * Method to draw the shadows
 	 */
-	function drawLightRays(shadowEdge) {
-		context.strokeStyle = 'green';
+	function drawShadows(shadowEdge) {
+		context.fillStyle = 'black';
+		let edgeTouched = false;
 		context.beginPath();
-		for (let node of shadowEdge) {
-			context.moveTo(lights[0].x, lights[0].y);
-			context.lineTo(node.x, node.y);
-			context.arc(node.x, node.y, 2, 0, 2 * Math.PI, false);
+		for (let polygon of shadowEdge) {
+			context.moveTo(polygon[0].x, polygon[0].y);
+			for (let i in polygon) {
+				i = parseInt(i);
+				let node = polygon[i];
+
+				context.lineTo(node.x, node.y);
+
+				let edge = isNodeOnScreenEdge(node);
+				edgeTouched = edgeTouched || (edge != false);
+				if (i > 0 && edge) {
+					let tmpNode = node;
+					let beginningPolygon = polygon[(i + 1) % polygon.length];
+					while (tmpNode.x != beginningPolygon.x && tmpNode.y != beginningPolygon.y) {
+						// top edge
+						if (tmpNode.x && !tmpNode.y) {
+							tmpNode = {x: 0, y: 0};
+						}
+						// left edge
+						else if (!tmpNode.x && tmpNode.y < canvas.height) {
+							tmpNode = {x: 0, y: canvas.height};
+						}
+						// bottom edge
+						else if (tmpNode.x < canvas.width && tmpNode.y == canvas.height) {
+							tmpNode = {x: canvas.width, y: canvas.height};
+						}
+						// right edge
+						else if (tmpNode.x == canvas.width && tmpNode.y) {
+							tmpNode = {x: canvas.width, y: 0};
+						}
+						context.lineTo(tmpNode.x, tmpNode.y);
+					}
+				}
+			}
 		}
-		context.stroke();
+
+		if (!edgeTouched) {
+			context.moveTo(screenCorners[3].x, screenCorners[3].y);
+			for (let corner = 2; corner >= 0; --corner) {
+				context.lineTo(screenCorners[corner].x, screenCorners[corner].y);
+			}
+		}
+		context.fill();
 	}
 
 	function mainLoop () {
@@ -246,12 +320,11 @@
 		if (delta > interval && needsRefresh) {
 			timePreviousFrame = now - (delta % interval);
 
+			context.clearRect(0, 0, canvas.width, canvas.height);
 			let lightRays = generateLightRays();
 			let shadowEdge = generateShadows(lightRays);
-
-			context.clearRect(0, 0, canvas.width, canvas.height);
 			drawSegments(segments);
-			drawLightRays(shadowEdge);
+			drawShadows(shadowEdge);
 			needsRefresh = false;
 		}
 	}
