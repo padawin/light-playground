@@ -264,6 +264,7 @@
 	 */
 	function drawShadows(shadowEdge) {
 		context.fillStyle = 'black';
+		let edgeTouched = false;
 		context.beginPath();
 		for (let polygon of shadowEdge) {
 			context.moveTo(polygon[0].x, polygon[0].y);
@@ -274,6 +275,7 @@
 				context.lineTo(node.x, node.y);
 
 				let edge = isNodeOnScreenEdge(node);
+				edgeTouched = edgeTouched || (edge != false);
 				if (i > 0 && edge) {
 					let tmpNode = node;
 					let beginningPolygon = polygon[(i + 1) % polygon.length];
@@ -297,6 +299,13 @@
 						context.lineTo(tmpNode.x, tmpNode.y);
 					}
 				}
+			}
+		}
+
+		if (!edgeTouched) {
+			context.moveTo(screenCorners[3].x, screenCorners[3].y);
+			for (let corner = 2; corner >= 0; --corner) {
+				context.lineTo(screenCorners[corner].x, screenCorners[corner].y);
 			}
 		}
 		context.fill();
