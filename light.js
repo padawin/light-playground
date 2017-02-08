@@ -264,8 +264,8 @@
 	 */
 	function drawShadows(shadowEdge) {
 		context.fillStyle = 'black';
+		context.beginPath();
 		for (let polygon of shadowEdge) {
-			context.beginPath();
 			context.moveTo(polygon[0].x, polygon[0].y);
 			for (let i in polygon) {
 				i = parseInt(i);
@@ -298,9 +298,8 @@
 					}
 				}
 			}
-
-			context.fill();
 		}
+		context.fill();
 	}
 
 	function mainLoop () {
